@@ -219,6 +219,6 @@ public class BlazeScalaMainClassRunConfigurationProducer
         project,
         projectData.artifactLocationDecoder,
         projectData.targetMap,
-        (target) -> target.kind == Kind.SCALA_BINARY && target.isPlainTarget());
+        (target) -> (target.kind == Kind.SCALA_BINARY || target.kind == Kind.SCALA_ANNEX_BINARY) && target.isPlainTarget());
   }
 }
