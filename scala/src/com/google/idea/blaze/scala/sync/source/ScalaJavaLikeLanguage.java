@@ -34,12 +34,12 @@ public class ScalaJavaLikeLanguage implements JavaLikeLanguage {
 
   @Override
   public ImmutableSet<Kind> getDebuggableKinds() {
-    return ImmutableSet.of(Kind.SCALA_BINARY, Kind.SCALA_TEST, Kind.SCALA_JUNIT_TEST);
+    return ImmutableSet.of(Kind.SCALA_BINARY, Kind.SCALA_TEST, Kind.SCALA_JUNIT_TEST, Kind.SCALA_ANNEX_BINARY, Kind.SCALA_ANNEX_TEST);
   }
 
   @Override
   public ImmutableSet<Kind> getHandledTestKinds() {
-    return ImmutableSet.of(Kind.SCALA_TEST);
+    return ImmutableSet.of(Kind.SCALA_TEST, Kind.SCALA_ANNEX_TEST);
   }
 
   @Override
