@@ -234,7 +234,7 @@ public final class BlazeJavaWorkspaceImporter {
       workspaceBuilder.jdeps.addAll(jars);
     }
 
-    // Add all deps if this rule is in the current working set
+    // Add all deps if this target is in the current working set
     if (workingSet == null || workingSet.isTargetInWorkingSet(target)) {
       // Add self, so we pick up our own gen jars if in working set
       workspaceBuilder.directDeps.add(targetKey);
