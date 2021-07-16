@@ -71,16 +71,34 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     if (!blazeProjectData.getWorkspaceLanguageSettings().isLanguageActive(LanguageClass.SCALA)) {
       return;
     }
-    for (Library library : ProjectLibraryTable.getInstance(project).getLibraries()) {
+    Boolean foundScala3 = false;
+    Library scala2Library = null;
+    Library scala3Library = null;
+    Library libraryToSetTypeFor = null;
+    for (Library library :
+        LibraryTablesRegistrar.getInstance().getLibraryTable(project).getLibraries()) {
       // Convert the type of the SDK library to prevent the scala plugin from
       // showing the missing SDK notification.
       // TODO: use a canonical class in the SDK (e.g., scala.App) instead of the name?
-      if (library.getName() != null && library.getName().startsWith("scala-library")) {
-        ExistingLibraryEditor editor = new ExistingLibraryEditor(library, null);
-        editor.setType(ScalaLibraryTypeCompat.getScalaLibraryType());
-        editor.commit();
-        return;
+      if (library.getName() != null && scala3Library == null) {
+        if (library.getName().startsWith("scala3-library")) {
+          scala3Library = library;
+        } else if (library.getName().startsWith("scala-library")) {
+          scala2Library = library;
+        }
       }
+    }
+
+    if (scala3Library != null) {
+      libraryToSetTypeFor = scala3Library;
+    } else if (scala2Library != null) {
+      libraryToSetTypeFor = scala2Library;
+    }
+    if (libraryToSetTypeFor != null) {
+      ExistingLibraryEditor editor = new ExistingLibraryEditor(libraryToSetTypeFor, null);
+      editor.setType(ScalaLibraryTypeCompat.getScalaLibraryType());
+      editor.commit();
+      return;
     }
   }
 
