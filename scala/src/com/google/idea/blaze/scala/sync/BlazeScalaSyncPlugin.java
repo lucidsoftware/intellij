@@ -110,7 +110,6 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
         Option<String> version = matcher.find() ? Some.apply(matcher.group()) : Option$.MODULE$.empty();
         editor.setProperties(ScalaLibraryProperties.apply(version, Seq$.MODULE$.empty()));
         editor.commit();
-        return;
       }
     }
   }
