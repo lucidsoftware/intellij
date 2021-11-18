@@ -44,8 +44,13 @@ import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTablesRegistrar;
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.annotation.Nullable;
+import org.jetbrains.plugins.scala.project.ScalaLibraryProperties;
 import org.jetbrains.plugins.scala.project.ScalaLibraryType;
+import scala.*;
+import scala.collection.immutable.Seq$;
 
 /** Supports scala. */
 public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
@@ -56,6 +61,8 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     }
     return ImmutableSet.of();
   }
+
+  private final Pattern versionPattern = Pattern.compile("\\d+(?:\\.\\d+)+");
 
   @Override
   public void updateProjectStructure(
@@ -76,9 +83,15 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
       // Convert the type of the SDK library to prevent the scala plugin from
       // showing the missing SDK notification.
       // TODO: use a canonical class in the SDK (e.g., scala.App) instead of the name?
-      if (library.getName() != null && library.getName().startsWith("scala-library")) {
+      // (The intellij scala plugin has methods that handle all this but I can't figure out how to use them from java)
+      // (they're on an implicit AnyVal class inside of a package object)
+      String libraryName = library.getName();
+      if (libraryName != null && libraryName.startsWith("scala-library")) {
         ExistingLibraryEditor editor = new ExistingLibraryEditor(library, null);
         editor.setType(ScalaLibraryType.apply());
+        Matcher matcher = versionPattern.matcher(libraryName);
+        Option<String> version = matcher.find() ? Some.apply(matcher.group()) : Option$.MODULE$.empty();
+        editor.setProperties(ScalaLibraryProperties.apply(version, Seq$.MODULE$.empty()));
         editor.commit();
         return;
       }
