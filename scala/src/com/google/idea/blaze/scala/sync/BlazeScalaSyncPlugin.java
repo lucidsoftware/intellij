@@ -100,7 +100,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     if (highestLibrary != null) {
       ExistingLibraryEditor editor = new ExistingLibraryEditor(highestLibrary, null);
       editor.setType(ScalaLibraryType.apply());
-      editor.setProperties(ScalaLibraryProperties.apply(Some.apply(highest), Seq$.MODULE$.empty()));
+      editor.setProperties(ScalaLibraryProperties.apply(Some.apply(highest), Seq$.MODULE$.empty(), Seq$.MODULE$.empty()));
       editor.commit();
     }
   }
