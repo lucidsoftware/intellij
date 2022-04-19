@@ -88,7 +88,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
       // (The intellij scala plugin has methods that handle all this but I can't figure out how to use them from java)
       // (they're on an implicit AnyVal class inside of a package object)
       String libraryName = library.getName();
-      if (libraryName != null && libraryName.matches("^scala3?-library.+")) {
+      if (libraryName != null && libraryName.matches("^(header_)?scala3?-library.+")) {
         Matcher matcher = versionPattern.matcher(libraryName);
         String version = matcher.find() ? matcher.group() : null;
         if (version != null && version.compareTo(highest) > 0) {
