@@ -37,7 +37,6 @@ import com.google.idea.blaze.base.sync.workspace.WorkingSet;
 import com.google.idea.blaze.scala.sync.importer.BlazeScalaWorkspaceImporter;
 import com.google.idea.blaze.scala.sync.model.BlazeScalaImportResult;
 import com.google.idea.blaze.scala.sync.model.BlazeScalaSyncData;
-import com.google.idea.sdkcompat.general.BaseSdkCompat;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.module.Module;
@@ -75,7 +74,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     return ImmutableSet.of();
   }
 
-  private final Pattern versionPattern = Pattern.compile("\\d+(?:\\.\\d+)+");
+  private static final Pattern versionPattern = Pattern.compile("\\d+(?:\\.\\d+)+");
 
   private static final Pattern RUNTIME_LIBRARY = Pattern.compile("((?:scala-|dotty-|scala3-|org_scala_lang_scala_)library).+");
 
@@ -84,7 +83,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
   }
 
   private static Option<String> libraryVersion(String name) {
-    Matcher matcher = LIBRARY_VERSION.matcher(name);
+    Matcher matcher = versionPattern.matcher(name);
     if (matcher.find()) {
       return Option.<String>apply(matcher.group());
     } else {
