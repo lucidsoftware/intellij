@@ -291,6 +291,7 @@ public final class BlazeJavaRunProfileState extends BlazeJavaDebuggableRunProfil
       }
       else {
         command.addBlazeFlags(BlazeFlags.JAVA_TEST_DEBUG);
+        command.addBlazeFlags(BlazeFlags.RUN_LOCALLY);
         command.addBlazeFlags(debugPortFlag(true, debugPort));
       }
       if (kotlinxCoroutinesJavaAgent != null) {
