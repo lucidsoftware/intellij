@@ -50,7 +50,8 @@ import com.intellij.openapi.roots.ModifiableRootModel;
 import com.intellij.openapi.roots.OrderRootType;
 import com.intellij.openapi.roots.ui.configuration.libraryEditor.ExistingLibraryEditor;
 import com.intellij.openapi.vfs.VirtualFile;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -205,7 +206,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
 
     // Create the Scala SDK from the SDK deps we just found
     LinkedList<VirtualFile> libraryClasses = new LinkedList<VirtualFile>();
-    LinkedList<File> compilerClasspath = new LinkedList<File>();
+    LinkedList<Path> compilerClasspath = new LinkedList<Path>();
     for (ScalaSdkJar currentClass : sdkClasses) {
       if (currentClass.highestVersionLibrary != null) {
         VirtualFile[] currentClassVirtualFiles =
@@ -222,7 +223,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
           if (path != null && path.endsWith(suffix)) {
             path = path.substring(0, path.length() - suffix.length());
           }
-          compilerClasspath.add(new File(path));
+          compilerClasspath.add(Paths.get(path));
         }
       }
     }
@@ -232,7 +233,7 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     final String scalaVersion = highestScalaLibraryVersion;
     ScalaLibraryProperties properties = ScalaLibraryProperties.apply(
       Some.apply(scalaVersion),
-      CollectionConverters.asScala(compilerClasspath).toList(),
+      CollectionConverters.asScala(compilerClasspath).toSeq(),
       Seq$.MODULE$.empty()
     );
 
