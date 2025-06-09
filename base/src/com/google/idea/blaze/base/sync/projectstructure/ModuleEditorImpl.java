@@ -122,8 +122,10 @@ public class ModuleEditorImpl implements BlazeSyncPlugin.ModuleEditor {
           continue;
         }
         moduleModel.disposeModule(module);
-        File imlFile = new File(module.getModuleFilePath());
-        removeImlFile(imlFile);
+        VirtualFile imlFile = module.getModuleFile();
+        if (imlFile != null) {
+          removeImlFile(imlFile);
+        }
       }
     }
 
@@ -141,6 +143,30 @@ public class ModuleEditorImpl implements BlazeSyncPlugin.ModuleEditor {
     return new File(BlazeDataStorage.getProjectDataDir(importSettings), "modules");
   }
 
+  private static void removeImlFile(final VirtualFile imlFile) {
+    if (imlFile.isDirectory()) {
+      return;
+    }
+
+    ApplicationManager.getApplication()
+      .runWriteAction(
+          new Runnable() {
+            @Override
+            public void run() {
+              try {
+                imlFile.delete(this);
+              } catch (IOException e) {
+                logger.warn(
+                    String.format(
+                        "Could not delete file: %s, will try to continue anyway.",
+                        imlFile.getPath()),
+                    e);
+              }
+            }
+          });
+  }
+
+
   // Delete using the virtual file to ensure that IntelliJ properly updates its index.
   // Otherwise, it is possible for IntelliJ to read the
   // old IML file from its index and behave unpredictably
@@ -148,22 +174,7 @@ public class ModuleEditorImpl implements BlazeSyncPlugin.ModuleEditor {
   private static void removeImlFile(final File imlFile) {
     final VirtualFile imlVirtualFile = VfsUtil.findFileByIoFile(imlFile, true);
     if (imlVirtualFile != null && imlVirtualFile.exists()) {
-      ApplicationManager.getApplication()
-          .runWriteAction(
-              new Runnable() {
-                @Override
-                public void run() {
-                  try {
-                    imlVirtualFile.delete(this);
-                  } catch (IOException e) {
-                    logger.warn(
-                        String.format(
-                            "Could not delete file: %s, will try to continue anyway.",
-                            imlVirtualFile.getPath()),
-                        e);
-                  }
-                }
-              });
+      removeImlFile(imlVirtualFile);
     }
   }
 }
