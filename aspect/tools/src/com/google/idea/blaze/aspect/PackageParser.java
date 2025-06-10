@@ -57,7 +57,6 @@ public class PackageParser {
 
   @VisibleForTesting
   static PackageParserOptions parseArgs(String[] args) {
-    args = parseParamFileIfUsed(args);
     PackageParserOptions options = new PackageParserOptions();
     options.sources =
         OptionParser.parseSingleOption(args, "sources", ArtifactLocationParser::parseList);
@@ -115,7 +114,7 @@ public class PackageParser {
 
   public static void main(String[] args) throws Exception {
     ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    PackageParserOptions options = parseArgs(args);
+    args = parseParamFileIfUsed(args);
     PackageParser parser = new PackageParser(PackageParserIoProvider.INSTANCE, executorService);
 
     try {
@@ -125,6 +124,7 @@ public class PackageParser {
         // redirect log output away from stdout.
         runPersistentWorker(parser);
       } else {
+        PackageParserOptions options = parseArgs(args);
         parsePackagesAndWriteManifest(parser, options);
       }
     } catch (Throwable e) {
