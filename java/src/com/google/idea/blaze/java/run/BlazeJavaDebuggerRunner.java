@@ -17,7 +17,6 @@ package com.google.idea.blaze.java.run;
 
 import com.google.idea.blaze.base.command.BlazeCommandName;
 import com.google.idea.blaze.base.logging.EventLoggingService;
-import com.google.idea.blaze.base.model.primitives.Kind;
 import com.google.idea.blaze.base.run.BlazeCommandRunConfiguration;
 import com.intellij.debugger.impl.GenericDebuggerRunner;
 import com.intellij.execution.ExecutionException;
@@ -49,8 +48,7 @@ public class BlazeJavaDebuggerRunner extends GenericDebuggerRunner {
       return false;
     }
     BlazeCommandRunConfiguration configuration = (BlazeCommandRunConfiguration) profile;
-    Kind kind = configuration.getTargetKind();
-    if (kind == null || !BlazeJavaRunConfigurationHandlerProvider.supportsKind(kind)) {
+    if (!BlazeJavaRunConfigurationHandlerProvider.supports(configuration)) {
       return false;
     }
     return canDebug(configuration.getHandler().getCommandName());

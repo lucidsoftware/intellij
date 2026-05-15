@@ -256,12 +256,11 @@ public class BlazeCommandRunConfiguration
 
   private void updateHandler() {
     BlazeCommandRunConfigurationHandlerProvider handlerProvider =
-        BlazeCommandRunConfigurationHandlerProvider.findHandlerProvider(
-            getTargetState(), getTargetKind());
+        BlazeCommandRunConfigurationHandlerProvider.findHandlerProvider(this);
     updateHandlerIfDifferentProvider(handlerProvider);
   }
 
-  private TargetState getTargetState() {
+  public TargetState getTargetState() {
     return targetPatterns.isEmpty() && pendingContext != null
         ? TargetState.PENDING
         : TargetState.KNOWN;
