@@ -37,6 +37,7 @@ import com.google.idea.blaze.base.sync.workspace.WorkingSet;
 import com.google.idea.blaze.scala.sync.importer.BlazeScalaWorkspaceImporter;
 import com.google.idea.blaze.scala.sync.model.BlazeScalaImportResult;
 import com.google.idea.blaze.scala.sync.model.BlazeScalaSyncData;
+import com.google.idea.sdkcompat.scala.ScalaCompat;
 import com.intellij.openapi.application.WriteAction;
 import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProvider;
 import com.intellij.openapi.module.Module;
@@ -62,8 +63,6 @@ import org.jetbrains.plugins.scala.project.ScalaLibraryProperties;
 import org.jetbrains.plugins.scala.project.ScalaLibraryType;
 import scala.Option;
 import scala.*;
-import scala.collection.immutable.Seq$;
-import scala.jdk.javaapi.CollectionConverters;
 
 /** Supports scala. */
 public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
@@ -231,11 +230,8 @@ public class BlazeScalaSyncPlugin implements BlazeSyncPlugin {
     String sdkName = "scala-sdk-" + highestScalaLibraryVersion;
     // Need a final on this string because we use it in the lambda below
     final String scalaVersion = highestScalaLibraryVersion;
-    ScalaLibraryProperties properties = ScalaLibraryProperties.apply(
-      Some.apply(scalaVersion),
-      CollectionConverters.asScala(compilerClasspath).toSeq(),
-      Seq$.MODULE$.empty()
-    );
+    ScalaLibraryProperties properties =
+        ScalaCompat.scalaLibraryProperties(Some.apply(scalaVersion), compilerClasspath);
 
     WriteAction.computeAndWait(() -> {
       Library library = libraryTable.createLibrary(sdkName);
