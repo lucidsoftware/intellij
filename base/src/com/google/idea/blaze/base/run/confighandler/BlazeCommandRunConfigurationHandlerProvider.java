@@ -51,6 +51,22 @@ public interface BlazeCommandRunConfigurationHandlerProvider {
         "No BlazeCommandRunConfigurationHandlerProvider found for Kind " + kind);
   }
 
+  /**
+   * Find a {@link BlazeCommandRunConfigurationHandlerProvider} applicable to the given configuration. Providers that
+   * need richer context than just the {@link Kind} can override {@link canHandleConfig} to make use of it.
+   */
+  static BlazeCommandRunConfigurationHandlerProvider findHandlerProvider(
+      BlazeCommandRunConfiguration configuration) {
+    for (BlazeCommandRunConfigurationHandlerProvider handlerProvider : EP_NAME.getExtensions()) {
+      if (handlerProvider.canHandleConfig(configuration)) {
+        return handlerProvider;
+      }
+    }
+
+    throw new RuntimeException(
+        "No BlazeCommandRunConfigurationHandlerProvider found for configuration " + configuration.getName());
+  }
+
   /** Get the BlazeCommandRunConfigurationHandlerProvider with the given ID, if one exists. */
   @Nullable
   static BlazeCommandRunConfigurationHandlerProvider getHandlerProvider(@Nullable String id) {
@@ -64,6 +80,14 @@ public interface BlazeCommandRunConfigurationHandlerProvider {
 
   /** Whether this extension is applicable to the kind. */
   boolean canHandleKind(TargetState state, @Nullable Kind kind);
+
+  /**
+   * Whether this extension is applicable to the given configuration. Defaults to delegating to
+   * {@link #canHandleKind}; override when the decision depends on details beyond the rule kind.
+   */
+  default boolean canHandleConfig(BlazeCommandRunConfiguration configuration) {
+    return canHandleKind(configuration.getTargetState(), configuration.getTargetKind());
+  }
 
   /** Returns the corresponding {@link BlazeCommandRunConfigurationHandler}. */
   BlazeCommandRunConfigurationHandler createHandler(BlazeCommandRunConfiguration configuration);

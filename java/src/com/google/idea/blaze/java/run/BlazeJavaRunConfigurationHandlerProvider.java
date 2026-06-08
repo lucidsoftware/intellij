@@ -16,10 +16,17 @@
 package com.google.idea.blaze.java.run;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.idea.blaze.base.ideinfo.TargetIdeInfo;
+import com.google.idea.blaze.base.ideinfo.TargetKey;
+import com.google.idea.blaze.base.model.BlazeProjectData;
 import com.google.idea.blaze.base.model.primitives.Kind;
+import com.google.idea.blaze.base.model.primitives.Label;
+import com.google.idea.blaze.base.model.primitives.RuleType;
+import com.google.idea.blaze.base.model.primitives.TargetExpression;
 import com.google.idea.blaze.base.run.BlazeCommandRunConfiguration;
 import com.google.idea.blaze.base.run.confighandler.BlazeCommandRunConfigurationHandler;
 import com.google.idea.blaze.base.run.confighandler.BlazeCommandRunConfigurationHandlerProvider;
+import com.google.idea.blaze.base.sync.data.BlazeProjectDataManager;
 import com.google.idea.blaze.java.sync.source.JavaLikeLanguage;
 import javax.annotation.Nullable;
 
@@ -30,13 +37,59 @@ public class BlazeJavaRunConfigurationHandlerProvider
   private static final ImmutableSet<Kind> RELEVANT_RULE_KINDS =
       JavaLikeLanguage.getAllDebuggableKinds();
 
+  /**
+   * A fallback for {@link supports} that can be used when synced target data isn't available. Prefer to call
+   * {@link supports} instead.
+   */
   static boolean supportsKind(@Nullable Kind kind) {
     return RELEVANT_RULE_KINDS.contains(kind);
+  }
+
+  /**
+   * Returns whether the Java handler should drive this configuration. True if either (a) the
+   * target's synced {@link TargetIdeInfo} carries a {@code JavaIdeInfo} and is a test or binary, or (b) the rule kind
+   * is explicitly registered as Java-like.
+   */
+  public static boolean supports(BlazeCommandRunConfiguration configuration) {
+    TargetIdeInfo target = resolveTarget(configuration);
+
+    if (target != null && target.getJavaIdeInfo() != null) {
+      RuleType ruleType = target.getKind().getRuleType();
+
+      if (ruleType == RuleType.TEST || ruleType == RuleType.BINARY) {
+        return true;
+      }
+    }
+
+    return supportsKind(configuration.getTargetKind());
+  }
+
+  @Nullable
+  private static TargetIdeInfo resolveTarget(BlazeCommandRunConfiguration configuration) {
+    TargetExpression target = configuration.getSingleTarget();
+
+    if (!(target instanceof Label)) {
+      return null;
+    }
+
+    BlazeProjectData projectData =
+        BlazeProjectDataManager.getInstance(configuration.getProject()).getBlazeProjectData();
+
+    if (projectData == null) {
+      return null;
+    }
+
+    return projectData.getTargetMap().get(TargetKey.forPlainTarget((Label) target));
   }
 
   @Override
   public boolean canHandleKind(TargetState state, @Nullable Kind kind) {
     return supportsKind(kind);
+  }
+
+  @Override
+  public boolean canHandleConfig(BlazeCommandRunConfiguration configuration) {
+    return supports(configuration);
   }
 
   @Override
